@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="padding: 0; overflow: hidden; border: none; background: transparent; box-shadow: none; max-width: 1400px;">
+    <div class="form-header" style="background: white; padding: 40px; border-radius: 24px 24px 0 0; border: 1px solid #f1f5f9; border-bottom: none; margin-bottom: 0;">
+        <div class="form-header-main" style="text-align: left;">
+            <h2 style="font-size: 2.5rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; text-align: left;">
+                <i class="fas fa-chart-pie" style="color: #0ea5e9; margin-right: 15px;"></i>Analytics Intelligence
+            </h2>
+            <p class="form-desc" style="font-size: 1.1rem;">Visualisasi metrik karyawan dan analisis risiko strategis dari model prediksi.</p>
+        </div>
+        <div class="status-badge">
+            <span class="pulse"></span> Live Data
+        </div>
+    </div>
+
+    <div style="background: white; padding: 0 20px 20px 20px; border: 1px solid #f1f5f9; border-top: none; border-radius: 0 0 24px 24px;">
+        <div class="dashboard-container" style="position: relative; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; background: #f8fafc;">
+            
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; text-align: center; color: #94a3b8;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <p>Memuat Dashboard Looker Studio...</p>
+            </div>
+
+            <iframe 
+                width="100%" 
+                height="800" 
+                src="https://lookerstudio.google.com/embed/reporting/506ac423-aecd-4b21-92fd-bd2387693a33/page/2V3qF" 
+                frameborder="0" 
+                style="border:0; position: relative; z-index: 1; display: block;" 
+                allowfullscreen 
+                sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+            </iframe>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+            <div style="display: flex; gap: 20px;">
+                <div style="font-size: 0.8rem; color: #64748b;">
+                    <i class="fas fa-info-circle"></i> Data diperbarui secara otomatis dari HR Database.
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="location.reload()" style="background: #f1f5f9; border: none; padding: 8px 15px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #0f172a; cursor: pointer; transition: 0.3s;">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+button:hover {
+    background: #e2e8f0 !important;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .form-header {
+        padding: 30px 20px !important;
+    }
+    h2 {
+        font-size: 1.8rem !important;
+    }
+    iframe {
+        height: 600px !important; 
+    }
+}
+</style>
+{% endblock %}

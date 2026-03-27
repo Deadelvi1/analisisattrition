@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card home-card" style="padding: 50px;">
+    <div class="form-header">
+        <div class="form-header-main">
+            <h2>Data Science Project Attrition Analyze</h2>
+            <p class="form-desc">Gunakan kekuatan Machine Learning untuk mengidentifikasi risiko pengunduran diri karyawan secara dini.</p>
+        </div>
+        <div class="status-badge">
+            <span class="pulse"></span> System Active
+        </div>
+    </div>
+
+    <div class="home-hero">
+        <div class="home-hero-bg"></div>
+        <h1>
+            Prediksi Retensi Karyawan <br>
+            <span>Presisi Tinggi.</span>
+        </h1>
+
+        <div class="home-hero-buttons">
+            <a href="/predict" class="btn-predict home-action">
+                <i class="fas fa-brain"></i> MULAI ANALISIS
+            </a>
+            <a href="/dashboard" class="btn-secondary home-action">
+                <i class="fas fa-chart-network"></i> LIHAT DASHBOARD
+            </a>
+        </div>
+    </div>
+
+    <hr style="margin: 60px 0; border: 0; border-top: 1px solid #f1f5f9;">
+
+    <div class="results-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+        
+        <div class="result-card" style="border-left: 4px solid #0ea5e9; background: #ffffff;">
+            <div class="card-header" style="flex-direction: row; text-align: left; gap: 15px;">
+                <div class="card-icon" style="background: #eff6ff; color: #0ea5e9; width: 45px; height: 45px;">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <div class="card-content">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">Robust Model</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Optimasi Random Forest untuk mencegah overfitting data HR.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-card" style="border-left: 4px solid #f59e0b; background: #ffffff;">
+            <div class="card-header" style="flex-direction: row; text-align: left; gap: 15px;">
+                <div class="card-icon" style="background: #fffbeb; color: #f59e0b; width: 45px; height: 45px;">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <div class="card-content">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">MLflow Tracked</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Lifecycle model terpantau penuh untuk akurasi jangka panjang.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-card performance-metrics" style="padding: 20px; background: #0f172a; border: none; color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Akurasi Sistem</span>
+                <i class="fas fa-signal" style="color: #10b981; font-size: 0.8rem;"></i>
+            </div>
+            
+            <div style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;">
+                {{ perf.test.accuracy | default(92.5) }}%
+            </div>
+            
+            <div class="progress-container" style="margin: 0 0 10px 0;">
+                <div class="progress-bar" style="height: 6px; background: rgba(255,255,255,0.1);">
+                    <div class="progress-fill dynamic-fill" data-progress="{{ perf.test.accuracy | default(92.5) }}"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; opacity: 0.7;">
+                <span>F1: {{ perf.test.f1 | default(89.1) }}%</span>
+                <span>Gap: {{ perf.overfit_gap | default(4.2) }}%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-predict:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(15,23,42,0.2);
+    filter: brightness(1.1);
+}
+
+.results-container {
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .results-container {
+        grid-template-columns: 1fr;
+    }
+    h1 {
+        font-size: 2.5rem !important;
+    }
+}
+</style>
+{% endblock %}

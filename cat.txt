@@ -1,0 +1,82 @@
+Langkah Utama:
+1. Latih model:
+   - Jalankan `python model/modeling.py`.
+   - Proses ini membuat artefak model di folder `model/`, termasuk:
+     - `attrition_model.pkl`: model RandomForest atau model terlatih lain.
+     - `scaler.pkl`: scaler feature (misalnya StandardScaler) untuk normalisasi input.
+     - `encoders.pkl`: label encoder untuk fitur kategorikal.
+     - `model_columns.pkl`: daftar kolom model yang dibutuhkan.
+     - `performance.pkl`: metrik akurasi/f1/overfit.
+
+2. Jalankan aplikasi:
+   - `python app.py`.
+   - Flask app menggunakan model dan artefak yang telah disimpan.
+
+3. Buka MLflow dashboard (opsional):
+   - `mlflow ui`
+
+---
+
+Alur Kode Aplikasi (`app.py`):
+- `load_all_resources()`: memuat model, scaler, encoder, kolom, dan perf dari disk. Jika gagal, kembalikan default perf 0.
+- `home()` : endpoint `/` memanggil resource; tampilan `home.html` menampilkan metrik perf yang dimuat.
+- `dashboard()`: endpoint `/dashboard` menampilkan `dashboard.html` (Looker iframe).
+- `predict()`:
+  - GET: render form `form_prediction.html`.
+  - POST: baca `request.form`, hitung `risk_score` rule-based via `compute_rule_risk`.
+  - Mengubah data kategorikal pakai `safe_label_transform` untuk mencocokkan `LabelEncoder`.
+  - Reindex kolom sesuai `model_columns`; fill missing dengan 0.
+  - Scaling data pakai `scaler.transform`.
+  - Prediksi model:
+    * `model.predict(input_scaled)[0]` -> 0/1 (Bertahan/Resign)
+    * `model.predict_proba(input_scaled)` -> probabilitas confidence dari kelas 1.
+  - `status_model` = `Resign` jika prediksi 1; else `Bertahan`.
+  - `status_rule`: rule-based threshold 55 (score >=55 -> Resign).
+  - `explanation`: jika beda antara model & rule, beri alasan text.
+  - `confidence_pct = round(confidence * 100, 2)` untuk tampil.
+  - `result` dibentuk lalu pass ke template.
+  - `note`: catatan warning jika `perf.overfit_detected`.
+
+Detail perhitungan `compute_rule_risk(raw)`:
+- Tambah poin di bawah kondisi rendah (Environment, Job, Overtime, WorkLifeBalance, YearsSinceLastPromotion, YearsAtCompany, DistanceFromHome, NumCompaniesWorked, MonthlyIncome).
+- Hasil akhir range 0-100.
+
+Data tambahan input: ada banyak `input type hidden` di `form_prediction.html` untuk nilai default (DailyRate, JobLevel, dsb), cocok dengan model input.
+
+Alur hasil prediksi:
+- Input user -> web form -> `POST /predict`.
+- Transformasi & preprocessing:
+  - encode kategorikal,
+  - numeric conversion,
+  - reindex kolom,
+  - scaling.
+- Prediksi model & probabilitas.
+- Rule-based risk score juga dihitung untuk kombinasi logika.
+- Kombinasikan `result` digabungkan dalam dict:
+  - `status`, `confidence`, `rule_risk`, `model_status`, `rule_status`, `explanation`, `performance`.
+- `form_prediction.html` menampilkan:
+  - status hasil, confidence, progress bar, risk score.
+  - performance metrics dari `performance.pkl`.
+
+Alur UI loading (baru):
+- Di `form_prediction.html` ada `id=loadingOverlay` overlay.
+- Saat tombol `predictBtn` diklik, JS akan:
+  - `button.disabled = true`, `cursor: not-allowed`, overlay aktif.
+  - overlay menampilkan spinner + teks.
+- Setelah server response, halaman reload & overlay hilang otomatis.
+
+Alur MLflow:
+- Script training `model/modeling.py` kemungkinan sudah memanggil tracking `mlflow.start_run`, `mlflow.log_metric`, `mlflow.log_artifact`.
+- Di runtime app.py tidak terhubung langsung ke MLflow, namun artefak model diambil dari folder model hasil experiment.
+- Buka UI `mlflow ui` untuk melihat riwayat run, metrik, parameter, dan artefak pembuatan model.
+
+Pastikan prediksi sesuai model:
+- Model di-load sekali setiap request /predict (bisa di-cache jika perf issue).
+- Setiap POST memproses inpu, transformasi, lalu `model.predict`.
+- Jika ada discordance, output ditulis sesuai nilai `model.predict` di `status_model` (otomatis jadi final status), rule hanya referensi.
+
+Catatan tambahan di front-end:
+- `dynamic-fill` menampilkan progress bar untuk rule risk dan confidence.
+- CSS biru-putih diatur agar semua tampilan konsisten.
+
+Dengan penjelasan ini, code flow lengkap: input -> preprocessing -> model -> rule -> output, dan MLflow untuk monitoring/tracking model training.

@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="padding: 80px;">
+    <div class="form-header">
+        <div class="form-header-main">
+            <h2>Form Analisis Prediktif Karyawan</h2>
+            <p class="form-desc">Masukkan data karyawan untuk memprediksi risiko pengunduran diri dengan akurasi tinggi</p>
+        </div>
+        <div class="status-badge">
+            <span class="pulse"></span> Model Siap
+        </div>
+    </div>
+
+    <form method="POST" action="/predict">
+        <div class="form-grid">
+            <div class="input-section">
+                <h4>📋 Data Dasar</h4>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-birthday-cake" style="margin-right: 8px; color: var(--accent);"></i> Umur Karyawan (Tahun)</label>
+                    <input type="number" name="Age" placeholder="Contoh: 30" min="18" max="100" step="1" required>
+                    <small>Usia saat ini dalam tahun</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-dollar-sign" style="margin-right: 8px; color: var(--accent);"></i> Gaji Bulanan (USD)</label>
+                    <input type="number" name="MonthlyIncome" placeholder="Contoh: 5000" min="0" step="100" required>
+                    <small>Total pendapatan per bulan dalam USD (sebelum pajak)</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--accent);"></i> Jarak Rumah-Kantor (KM)</label>
+                    <input type="number" name="DistanceFromHome" placeholder="Contoh: 10" min="0" step="0.5" required>
+                    <small>Jarak tempuh satu arah dari rumah</small>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h4>⏱️ Pengalaman Kerja</h4>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-briefcase" style="margin-right: 8px; color: var(--accent);"></i> Total Pengalaman Kerja (Tahun)</label>
+                    <input type="number" name="TotalWorkingYears" placeholder="Contoh: 8" min="0" step="1" required>
+                    <small>Total lama bekerja di semua perusahaan</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-building" style="margin-right: 8px; color: var(--accent);"></i> Lama di Perusahaan Ini (Tahun)</label>
+                    <input type="number" name="YearsAtCompany" placeholder="Contoh: 3" min="0" step="0.5" required>
+                    <small>Waktu kerja di perusahaan saat ini</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-user-tie" style="margin-right: 8px; color: var(--accent);"></i> Lama dalam Posisi Saat Ini (Tahun)</label>
+                    <input type="number" name="YearsInCurrentRole" placeholder="Contoh: 2" min="0" step="0.5" required>
+                    <small>Durasi memegang jabatan sekarang</small>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h4>⭐ Kepuasan & Pengembangan</h4>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-smile" style="margin-right: 8px; color: var(--accent);"></i> Kepuasan Lingkungan Kerja (1-4)</label>
+                    <input type="number" name="EnvironmentSatisfaction" min="1" max="4" placeholder="Pilih: 1-4" step="1" required>
+                    <small>1 = Sangat Buruk | 4 = Sangat Puas</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-balance-scale" style="margin-right: 8px; color: var(--accent);"></i> Keseimbangan Kerja/Hidup (1-4)</label>
+                    <input type="number" name="WorkLifeBalance" min="1" max="4" placeholder="Pilih: 1-4" step="1" required>
+                    <small>Tingkat keseimbangan hidup-kerja</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-arrow-up" style="margin-right: 8px; color: var(--accent);"></i> Lama Sejak Promosi Terakhir (Tahun)</label>
+                    <input type="number" name="YearsSinceLastPromotion" placeholder="Contoh: 1" min="0" step="0.5" required>
+                    <small>Tahun sejak promosi atau kenaikan jabatan</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-heart" style="margin-right: 8px; color: var(--accent);"></i> Status Pernikahan</label>
+                    <select name="MaritalStatus" required>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                    </select>
+                    <small>Status pernikahan saat ini</small>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-clock" style="margin-right: 8px; color: var(--accent);"></i> Apakah Sering Lembur?</label>
+                    <select name="OverTime" required>
+                        <option value="No">Tidak</option>
+                        <option value="Yes">Ya</option>
+                    </select>
+                    <small>Apakah karyawan sering bekerja lembur?</small>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="DailyRate" value="800">
+        <input type="hidden" name="Education" value="3">
+        <input type="hidden" name="HourlyRate" value="65">
+        <input type="hidden" name="JobInvolvement" value="3">
+        <input type="hidden" name="JobLevel" value="2">
+        <input type="hidden" name="JobSatisfaction" value="3">
+        <input type="hidden" name="NumCompaniesWorked" value="1">
+        <input type="hidden" name="PercentSalaryHike" value="12">
+        <input type="hidden" name="PerformanceRating" value="3">
+        <input type="hidden" name="RelationshipSatisfaction" value="3">
+        <input type="hidden" name="StockOptionLevel" value="0">
+        <input type="hidden" name="TrainingTimesLastYear" value="2">
+        <input type="hidden" name="BusinessTravel" value="Travel_Rarely">
+        <input type="hidden" name="Department" value="Research & Development">
+        <input type="hidden" name="EducationField" value="Life Sciences">
+        <input type="hidden" name="Gender" value="Male">
+        <input type="hidden" name="JobRole" value="Research Scientist">
+        <input type="hidden" name="MonthlyRate" value="15000">
+
+        <button type="submit" id="predictBtn" class="btn-predict">
+            <i class="fas fa-brain"></i> JALANKAN ANALISIS PREDIKTIF
+        </button>
+    </form>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Sedang memproses prediksi... Harap tunggu.</div>
+        </div>
+    </div>
+
+    {% if note %}
+    <div class="note-box">
+        ⚠️ {{ note }}
+    </div>
+    {% endif %}
+
+    {% if result %}
+    <div class="results-container">
+        <div class="result-card main-prediction {% if result.status == 'Resign' %}danger{% else %}success{% endif %}">
+            <div class="card-header">
+                <div class="card-icon">
+                    {% if result.status == 'Resign' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="card-content">
+                    <h3>
+                        {% if result.status == 'Resign' %}
+                        Risiko Pengunduran Diri
+                        {% else %}
+                        Rekomendasi Pertahankan
+                        {% endif %}
+                    </h3>
+                    <p class="prediction-text">Prediksi: <strong>{{ result.status }}</strong></p>
+                </div>
+                <div class="confidence-badge">{{ result.confidence }}%</div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill {{ result.confidence_class }}"></div>
+                </div>
+                <div class="progress-labels">
+                    <span>Rendah</span>
+                    <span>Tinggi</span>
+                </div>
+            </div>
+            
+            <p class="result-description">
+                Berdasarkan analysis data yang diinput, sistem memprediksi karyawan akan 
+                <strong>{{ result.status }}</strong> dengan tingkat kepercayaan 
+                <strong>{{ result.confidence }}%</strong>.
+                {% if result.status == 'Resign' %}
+                Rekomendasi: Segera lakukan intervensi untuk meningkatkan kepuasan dan retensi.
+                {% else %}
+                Karyawan ini memiliki engagement tinggi dan kemungkinan akan bertahan.
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="result-card risk-analysis">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Analisis Risiko Detail</h3>
+                    <p class="card-subtitle">Breakdown skor risiko dan faktor penentu</p>
+                </div>
+            </div>
+            
+            <div class="risk-details">
+                <div class="risk-metric">
+                    <div class="metric-label">Rule-based Risk Score</div>
+                    <div class="metric-value">{{ result.rule_risk }}%</div>
+                    <div class="metric-bar">
+                        <div class="metric-fill dynamic-fill" data-progress="{{ result.rule_risk }}"></div>
+                    </div>
+                </div>
+                
+                <div class="risk-status">
+                    <div class="status-item">
+                        <span class="status-label">Model Status:</span>
+                        <span class="status-value {{ 'success' if result.model_status == 'Stay' else 'danger' }}">{{ result.model_status }}</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Rule Status:</span>
+                        <span class="status-value {{ 'success' if result.rule_status == 'Stay' else 'danger' }}">{{ result.rule_status }}</span>
+                    </div>
+                </div>
+                
+                <div class="explanation-box">
+                    <strong>Penjelasan:</strong> {{ result.explanation }}
+                </div>
+            </div>
+        </div>
+
+        <div class="result-card performance-metrics">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Metrik Model</h3>
+                    <p class="card-subtitle">Performa dan akurasi sistem prediksi</p>
+                </div>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-name">Test Accuracy</div>
+                        <div class="metric-value">{{ result.performance.test.accuracy }}%</div>
+                    </div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-name">Test F1 Score</div>
+                        <div class="metric-value">{{ result.performance.test.f1 }}%</div>
+                    </div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-name">Val Accuracy</div>
+                        <div class="metric-value">{{ result.performance.val.accuracy }}%</div>
+                    </div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-name">Overfit Gap</div>
+                        <div class="metric-value">{{ result.performance.overfit_gap }}%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cv-stats">
+                <i class="fas fa-microscope"></i>
+                <span>Cross-Validation F1: <strong>{{ result.performance.cv_f1_mean }}%</strong> ± <strong>{{ result.performance.cv_f1_std }}%</strong></span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .card { padding: 30px 20px; }
+    .form-header { flex-direction: column; align-items: flex-start; margin-bottom: 25px; }
+    .form-grid { gap: 30px; }
+    .input-section { gap: 22px; }
+    .result-header { flex-direction: column; }
+    .metric-grid { grid-template-columns: 1fr 1fr; }
+    
+    .results-container { gap: 20px; }
+    .result-card { padding: 24px 20px; }
+    .card-header { gap: 16px; flex-direction: column; text-align: center; }
+    .card-icon { width: 50px; height: 50px; font-size: 1.2rem; }
+    .card-content h3 { font-size: 1.2rem; }
+    .confidence-badge { font-size: 1rem; padding: 10px 16px; }
+    .progress-container .progress-bar { height: 20px; }
+    .metrics-grid { grid-template-columns: 1fr; gap: 16px; }
+    .metric-item { padding: 16px; }
+    .metric-icon { width: 40px; height: 40px; font-size: 1rem; }
+    .risk-status { grid-template-columns: 1fr; }
+    .status-item { padding: 10px 12px; }
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.querySelector('form[action="/predict"]');
+        var button = document.getElementById('predictBtn');
+        var overlay = document.getElementById('loadingOverlay');
+
+        if (form && button && overlay) {
+            form.addEventListener('submit', function() {
+                button.disabled = true;
+                button.style.cursor = 'not-allowed';
+                overlay.classList.add('active');
+            });
+        }
+
+        // fill dynamic-fill bars and other numeric bars in results
+        document.querySelectorAll('.dynamic-fill[data-progress]').forEach(function(el) {
+            var value = parseFloat(el.getAttribute('data-progress'));
+            if (!isNaN(value)) {
+                el.style.width = Math.min(100, Math.max(0, value)) + '%';
+            }
+        });
+    });
+</script>
+{% endblock %}
