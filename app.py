@@ -3,27 +3,48 @@ import pandas as pd
 import joblib
 import os
 import json
+from pathlib import Path
 
 app = Flask(__name__)
 
-MODEL_PATH = "model/rf_model_tuning_latest.pkl"
-PERF_PATH = "model/performance.json"
+ROOT_DIR = Path(__file__).resolve().parent
+MODEL_PATH = ROOT_DIR / "model" / "rf_model_tuning_latest.pkl"
+MODEL_ALT_PATH = ROOT_DIR / "model" / "rf_model_latest.pkl"
+PERF_PATH = ROOT_DIR / "model" / "performance.json"
+model = None
+MODEL_READY = False
+
+performance = {
+    "test": {"accuracy": 83.96, "f1": 52.78, "precision": 52.78, "recall": 52.78},
+    "val": {"accuracy": 83.96},
+    "overfit_gap": 0.0,
+    "cv_f1_mean": 51.4,
+    "cv_f1_std": 1.8
+}
+
+
+def load_model():
+    global model, MODEL_READY
+    for candidate in [MODEL_PATH, MODEL_ALT_PATH]:
+        if candidate.exists():
+            try:
+                model = joblib.load(candidate)
+                MODEL_READY = True
+                return
+            except Exception:
+                continue
+    MODEL_READY = False
+
+
+load_model()
 
 try:
-    model = joblib.load(MODEL_PATH)
-    MODEL_READY = True
-    with open(PERF_PATH, "r") as f:
-        performance = json.load(f)
-except:
-    MODEL_READY = False
-    performance = {
-        "test": {"accuracy": 83.96, "f1": 52.78, "precision": 52.78, "recall": 52.78},
-        "val": {"accuracy": 83.96},
-        "overfit_gap": 0.0,
-        "cv_f1_mean": 51.4,
-        "cv_f1_std": 1.8
-    }
- 
+    if PERF_PATH.exists():
+        with open(PERF_PATH, "r") as f:
+            performance = json.load(f)
+except Exception:
+    pass
+
 
 def compute_rule_risk(raw):
     def num(key, default=0):
@@ -79,9 +100,19 @@ def predict():
     result = None
     note = None
 
+    if request.method == 'GET' and not MODEL_READY:
+        note = (
+            "Model belum siap. Pastikan file model sudah ada di folder `model/` "
+            "dan Railway menggunakan kode yang sama dari repository."
+        )
+
     if request.method == 'POST':
         if not MODEL_READY:
-            return "Model belum siap"
+            note = (
+                "Model belum siap. Pastikan file model sudah ada di folder `model/` "
+                "dan Railway menggunakan kode yang sama dari repository."
+            )
+            return render_template("form_prediction.html", result=None, note=note)
 
         try:
             try:
