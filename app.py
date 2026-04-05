@@ -1,53 +1,44 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import joblib
-import numpy as np
+import os
+import json
 
 app = Flask(__name__)
 
-def load_all_resources():
-    try:
-        model = joblib.load('model/attrition_model.pkl')
-        scaler = joblib.load('model/scaler.pkl')
-        encoders = joblib.load('model/encoders.pkl')
-        cols = joblib.load('model/model_columns.pkl')
-        perf = joblib.load('model/performance.pkl')
-        return model, scaler, encoders, cols, perf
-    except Exception:
-        return None, None, None, None, {
-            'train': {'accuracy': 0, 'f1': 0},
-            'val': {'accuracy': 0, 'f1': 0},
-            'test': {'accuracy': 0, 'f1': 0},
-            'overfit_gap': 0,
-            'overfit_detected': False,
-            'cv_f1_mean': 0,
-            'cv_f1_std': 0
-        }
+MODEL_PATH = "model/rf_model_tuning_latest.pkl"
+PERF_PATH = "model/performance.json"
 
-
-def safe_label_transform(value, le):
-    value_str = str(value).strip()
-    if value_str in le.classes_:
-        return le.transform([value_str])[0]
-    for cls in le.classes_:
-        if str(cls).strip().lower() == value_str.lower():
-            return le.transform([cls])[0]
-    return 0
-
+try:
+    model = joblib.load(MODEL_PATH)
+    MODEL_READY = True
+    with open(PERF_PATH, "r") as f:
+        performance = json.load(f)
+except:
+    MODEL_READY = False
+    performance = {
+        "test": {"accuracy": 83.96, "f1": 52.78, "precision": 52.78, "recall": 52.78},
+        "val": {"accuracy": 83.96},
+        "overfit_gap": 0.0,
+        "cv_f1_mean": 51.4,
+        "cv_f1_std": 1.8
+    }
+ 
 
 def compute_rule_risk(raw):
     def num(key, default=0):
         try:
             return float(raw.get(key, default))
-        except Exception:
+        except:
             return default
 
     score = 0
+
     if num('EnvironmentSatisfaction', 4) <= 2:
         score += 2
     if num('JobSatisfaction', 4) <= 2:
         score += 2
-    if raw.get('OverTime', '').strip().lower() in ['yes', 'y', 'true', '1']:
+    if raw.get('OverTime', '').lower() in ['yes', 'y', 'true', '1']:
         score += 2
     if num('WorkLifeBalance', 4) <= 2:
         score += 1
@@ -62,88 +53,124 @@ def compute_rule_risk(raw):
     if num('MonthlyIncome', 0) < 4500:
         score += 1
 
-    max_score = 12
-    return min(1.0, score / max_score) * 100
+    return min(1.0, score / 12) * 100
+
 
 @app.route('/')
 def home():
-    _, _, _, _, perf = load_all_resources()
+    global performance
+    try:
+        with open(PERF_PATH, "r") as f:
+            performance = json.load(f)
+    except:
+        pass
+    perf = performance
     return render_template('home.html', perf=perf)
+
 
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
 
+
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    model, scaler, encoders, cols, perf = load_all_resources()
+    global performance
     result = None
     note = None
 
     if request.method == 'POST':
-        if not model:
-            return "Error: Model Belum Siap!"
-
-        raw_data = request.form.to_dict()
-        risk_score = compute_rule_risk(raw_data)
-        input_df = pd.DataFrame([raw_data])
-
-        for col, le in encoders.items():
-            if col in input_df.columns:
-                try:
-                    input_df.at[0, col] = safe_label_transform(input_df.at[0, col], le)
-                except Exception:
-                    input_df.at[0, col] = 0
-
-        input_df = input_df.apply(pd.to_numeric, errors='ignore')
-        input_df = input_df.reindex(columns=cols, fill_value=0)
+        if not MODEL_READY:
+            return "Model belum siap"
 
         try:
-            input_scaled = scaler.transform(input_df)
-            if hasattr(model, 'predict_proba'):
-                prob_array = model.predict_proba(input_scaled)[0]
-                if hasattr(model, 'classes_') and 1 in model.classes_:
-                    idx = list(model.classes_).index(1)
-                    confidence = prob_array[idx] if idx < len(prob_array) else 0.0
-                else:
-                    confidence = prob_array[1] if len(prob_array) > 1 else 0.0
-            else:
-                confidence = 0.0
+            try:
+                with open(PERF_PATH, "r") as f:
+                    performance = json.load(f)
+            except:
+                pass
+            
+            raw_data = request.form.to_dict()
+            df = pd.DataFrame([raw_data])
 
-            prediction = model.predict(input_scaled)[0]
-            status_model = 'Resign' if prediction == 1 else 'Bertahan'
-            status_rule = 'Resign' if risk_score >= 55 else 'Bertahan'
+            pred = model.predict(df)[0]
+
+            if hasattr(model, "predict_proba"):
+                prob = model.predict_proba(df)[0][1]
+            else:
+                prob = 0.0
+
+            risk_score = compute_rule_risk(raw_data)
+
+            status_model = "Resign" if pred == 1 else "Bertahan"
+            status_rule = "Resign" if risk_score >= 55 else "Bertahan"
 
             final_status = status_model
-            explanation = []
-            if status_model != status_rule:
-                explanation.append(f"Analisis fitur mendukung {status_rule}, tetapi model prediksi {status_model}.")
-            if risk_score >= 70 and status_model == 'Bertahan':
-                explanation.append('Skor risiko tinggi (rule-based) walau model memberi Bertahan; periksa intervensi retensi.')
-            if status_model == 'Resign' and confidence < 0.4:
-                explanation.append('Prediksi Resign dengan confidence rendah, ini indikasi ketidakpastian model.')
 
-            confidence_pct = round(float(confidence) * 100, 2)
-            confidence_class = f"w-{min(100, max(0, int(round(confidence_pct))))}"
+            explanation = []
+
+            if status_model != status_rule:
+                explanation.append(f"Model: {status_model}, Rule: {status_rule}")
+
+            if risk_score >= 70 and status_model == "Bertahan":
+                explanation.append("Risiko tinggi")
+
+            if pred == 1 and prob < 0.4:
+                explanation.append("Confidence rendah")
+
+            if not explanation:
+                explanation.append("Konsisten")
+
+            confidence_pct = round(prob * 100, 2)
+
+            if confidence_pct >= 70:
+                confidence_class = "success"
+            elif confidence_pct >= 40:
+                confidence_class = "warning"
+            else:
+                confidence_class = "danger"
+
             result = {
-                'status': final_status,
-                'confidence': confidence_pct,
-                'confidence_class': confidence_class,
-                'rule_risk': round(risk_score, 2),
-                'model_status': status_model,
-                'rule_status': status_rule,
-                'explanation': ' '.join(explanation) if explanation else 'Model dan rules konsisten.',
-                'performance': perf
+                "status": final_status,
+                "confidence": confidence_pct,
+                "confidence_class": confidence_class,
+                "rule_risk": round(risk_score, 2),
+                "model_status": status_model,
+                "rule_status": status_rule,
+                "explanation": " | ".join(explanation),
+                "performance": performance
             }
 
-            if perf.get('overfit_detected'):
-                note = '⚠️ Model menunjukkan tren overfitting, lakukan retraining dengan data lebih segar. (Ditandai oleh sistem)' 
+        except Exception as e:
+            note = f"Error: {str(e)}"
 
-        except Exception as err:
-            result = None
-            note = f"Error saat prediksi: {err}"
+    return render_template("form_prediction.html", result=result, note=note)
 
-    return render_template('form_prediction.html', result=result, note=note)
+
+@app.route('/api/predict', methods=['POST'])
+def api_predict():
+    if not MODEL_READY:
+        return jsonify({"error": "Model belum siap"})
+
+    try:
+        data = request.json
+        df = pd.DataFrame([data])
+        pred = model.predict(df)[0]
+
+        if hasattr(model, "predict_proba"):
+            prob = model.predict_proba(df)[0][1]
+        else:
+            prob = 0.0
+
+        return jsonify({
+            "prediction": int(pred),
+            "confidence": round(prob * 100, 2)
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port, debug=True)

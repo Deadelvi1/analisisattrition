@@ -12,74 +12,20 @@
     </div>
 
     <form method="POST" action="/predict">
+        <input type="hidden" name="EmployeeId" id="EmployeeId" value="">
+
         <div class="form-grid">
             <div class="input-section">
-                <h4>📋 Data Dasar</h4>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-birthday-cake" style="margin-right: 8px; color: var(--accent);"></i> Umur Karyawan (Tahun)</label>
-                    <input type="number" name="Age" placeholder="Contoh: 30" min="18" max="100" step="1" required>
-                    <small>Usia saat ini dalam tahun</small>
-                </div>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-dollar-sign" style="margin-right: 8px; color: var(--accent);"></i> Gaji Bulanan (USD)</label>
-                    <input type="number" name="MonthlyIncome" placeholder="Contoh: 5000" min="0" step="100" required>
-                    <small>Total pendapatan per bulan dalam USD (sebelum pajak)</small>
-                </div>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--accent);"></i> Jarak Rumah-Kantor (KM)</label>
-                    <input type="number" name="DistanceFromHome" placeholder="Contoh: 10" min="0" step="0.5" required>
-                    <small>Jarak tempuh satu arah dari rumah</small>
-                </div>
-            </div>
+                <h4>📌 Profil Karyawan</h4>
 
-            <div class="input-section">
-                <h4>⏱️ Pengalaman Kerja</h4>
-                
                 <div class="input-group">
-                    <label><i class="fas fa-briefcase" style="margin-right: 8px; color: var(--accent);"></i> Total Pengalaman Kerja (Tahun)</label>
-                    <input type="number" name="TotalWorkingYears" placeholder="Contoh: 8" min="0" step="1" required>
-                    <small>Total lama bekerja di semua perusahaan</small>
+                    <label><i class="fas fa-birthday-cake" style="margin-right: 8px; color: var(--accent);"></i> Umur Karyawan</label>
+                    <input type="number" name="Age" placeholder="Contoh: 34" min="18" max="100" step="1" required>
+                    <small>Usia karyawan saat ini</small>
                 </div>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-building" style="margin-right: 8px; color: var(--accent);"></i> Lama di Perusahaan Ini (Tahun)</label>
-                    <input type="number" name="YearsAtCompany" placeholder="Contoh: 3" min="0" step="0.5" required>
-                    <small>Waktu kerja di perusahaan saat ini</small>
-                </div>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-user-tie" style="margin-right: 8px; color: var(--accent);"></i> Lama dalam Posisi Saat Ini (Tahun)</label>
-                    <input type="number" name="YearsInCurrentRole" placeholder="Contoh: 2" min="0" step="0.5" required>
-                    <small>Durasi memegang jabatan sekarang</small>
-                </div>
-            </div>
 
-            <div class="input-section">
-                <h4>⭐ Kepuasan & Pengembangan</h4>
-                
                 <div class="input-group">
-                    <label><i class="fas fa-smile" style="margin-right: 8px; color: var(--accent);"></i> Kepuasan Lingkungan Kerja (1-4)</label>
-                    <input type="number" name="EnvironmentSatisfaction" min="1" max="4" placeholder="Pilih: 1-4" step="1" required>
-                    <small>1 = Sangat Buruk | 4 = Sangat Puas</small>
-                </div>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-balance-scale" style="margin-right: 8px; color: var(--accent);"></i> Keseimbangan Kerja/Hidup (1-4)</label>
-                    <input type="number" name="WorkLifeBalance" min="1" max="4" placeholder="Pilih: 1-4" step="1" required>
-                    <small>Tingkat keseimbangan hidup-kerja</small>
-                </div>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-arrow-up" style="margin-right: 8px; color: var(--accent);"></i> Lama Sejak Promosi Terakhir (Tahun)</label>
-                    <input type="number" name="YearsSinceLastPromotion" placeholder="Contoh: 1" min="0" step="0.5" required>
-                    <small>Tahun sejak promosi atau kenaikan jabatan</small>
-                </div>
-                
-                <div class="input-group">
-                    <label><i class="fas fa-heart" style="margin-right: 8px; color: var(--accent);"></i> Status Pernikahan</label>
+                    <label><i class="fas fa-ring" style="margin-right: 8px; color: var(--accent);"></i> Status Pernikahan</label>
                     <select name="MaritalStatus" required>
                         <option value="Single">Single</option>
                         <option value="Married">Married</option>
@@ -87,36 +33,126 @@
                     </select>
                     <small>Status pernikahan saat ini</small>
                 </div>
-                
+
                 <div class="input-group">
-                    <label><i class="fas fa-clock" style="margin-right: 8px; color: var(--accent);"></i> Apakah Sering Lembur?</label>
-                    <select name="OverTime" required>
-                        <option value="No">Tidak</option>
-                        <option value="Yes">Ya</option>
+                    <label><i class="fas fa-building" style="margin-right: 8px; color: var(--accent);"></i> Departemen</label>
+                    <select name="Department" required>
+                        <option value="Research & Development">Research & Development</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Human Resources">Human Resources</option>
                     </select>
-                    <small>Apakah karyawan sering bekerja lembur?</small>
+                    <small>Unit kerja karyawan</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-user-tie" style="margin-right: 8px; color: var(--accent);"></i> Job Role</label>
+                    <select name="JobRole" required>
+                        <option value="Research Scientist">Research Scientist</option>
+                        <option value="Laboratory Technician">Laboratory Technician</option>
+                        <option value="Manufacturing Director">Manufacturing Director</option>
+                        <option value="Research Director">Research Director</option>
+                        <option value="Healthcare Representative">Healthcare Representative</option>
+                        <option value="Sales Representative">Sales Representative</option>
+                        <option value="Sales Executive">Sales Executive</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Human Resources">Human Resources</option>
+                    </select>
+                    <small>Peran pekerjaan karyawan</small>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h4>💰 Kompensasi & Lokasi</h4>
+
+                <div class="input-group">
+                    <label><i class="fas fa-dollar-sign" style="margin-right: 8px; color: var(--accent);"></i> Gaji Bulanan</label>
+                    <input type="number" name="MonthlyIncome" placeholder="Contoh: 7500" min="0" step="100" required>
+                    <small>Penghasilan bulanan sebelum pajak</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--accent);"></i> Jarak Rumah-Kantor (KM)</label>
+                    <input type="number" name="DistanceFromHome" placeholder="Contoh: 10" min="0" step="0.5" required>
+                    <small>Jarak tempuh satu arah dari rumah ke kantor</small>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h4>⏳ Pengalaman Kerja</h4>
+
+                <div class="input-group">
+                    <label><i class="fas fa-briefcase" style="margin-right: 8px; color: var(--accent);"></i> Total Pengalaman Kerja</label>
+                    <input type="number" name="TotalWorkingYears" placeholder="Contoh: 10" min="0" step="1" required>
+                    <small>Semua pengalaman kerja sebelumnya</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-building" style="margin-right: 8px; color: var(--accent);"></i> Lama di Perusahaan</label>
+                    <input type="number" name="YearsAtCompany" placeholder="Contoh: 4" min="0" step="0.5" required>
+                    <small>Lama bekerja di perusahaan saat ini</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-user-clock" style="margin-right: 8px; color: var(--accent);"></i> Lama di Posisi Saat Ini</label>
+                    <input type="number" name="YearsInCurrentRole" placeholder="Contoh: 2" min="0" step="0.5" required>
+                    <small>Durasi jabatan terkini</small>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h4>⭐ Kepuasan & Lingkungan</h4>
+
+                <div class="input-group">
+                    <label><i class="fas fa-smile-beam" style="margin-right: 8px; color: var(--accent);"></i> Kepuasan Pekerjaan</label>
+                    <input type="number" name="JobSatisfaction" placeholder="1-4" min="1" max="4" step="1" required>
+                    <small>1 = sangat tidak puas, 4 = sangat puas</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-smile" style="margin-right: 8px; color: var(--accent);"></i> Kepuasan Lingkungan Kerja</label>
+                    <input type="number" name="EnvironmentSatisfaction" placeholder="1-4" min="1" max="4" step="1" required>
+                    <small>1 = buruk, 4 = sangat baik</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-balance-scale" style="margin-right: 8px; color: var(--accent);"></i> Work-Life Balance</label>
+                    <input type="number" name="WorkLifeBalance" placeholder="1-4" min="1" max="4" step="1" required>
+                    <small>1 = buruk, 4 = seimbang</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-arrow-up" style="margin-right: 8px; color: var(--accent);"></i> Lama Sejak Promosi Terakhir (Tahun)</label>
+                    <input type="number" name="YearsSinceLastPromotion" placeholder="Contoh: 1" min="0" step="0.5" required>
+                    <small>Tahun sejak promosi atau kenaikan jabatan terakhir</small>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-clock" style="margin-right: 8px; color: var(--accent);"></i> Lembur?</label>
+                    <select name="OverTime" required>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                    <small>Apakah karyawan sering lembur?</small>
                 </div>
             </div>
         </div>
 
-        <input type="hidden" name="DailyRate" value="800">
         <input type="hidden" name="Education" value="3">
-        <input type="hidden" name="HourlyRate" value="65">
-        <input type="hidden" name="JobInvolvement" value="3">
-        <input type="hidden" name="JobLevel" value="2">
-        <input type="hidden" name="JobSatisfaction" value="3">
-        <input type="hidden" name="NumCompaniesWorked" value="1">
-        <input type="hidden" name="PercentSalaryHike" value="12">
-        <input type="hidden" name="PerformanceRating" value="3">
-        <input type="hidden" name="RelationshipSatisfaction" value="3">
-        <input type="hidden" name="StockOptionLevel" value="0">
-        <input type="hidden" name="TrainingTimesLastYear" value="2">
-        <input type="hidden" name="BusinessTravel" value="Travel_Rarely">
-        <input type="hidden" name="Department" value="Research & Development">
         <input type="hidden" name="EducationField" value="Life Sciences">
         <input type="hidden" name="Gender" value="Male">
-        <input type="hidden" name="JobRole" value="Research Scientist">
+        <input type="hidden" name="JobLevel" value="2">
+        <input type="hidden" name="JobInvolvement" value="3">
+        <input type="hidden" name="PerformanceRating" value="3">
         <input type="hidden" name="MonthlyRate" value="15000">
+        <input type="hidden" name="DailyRate" value="800">
+        <input type="hidden" name="HourlyRate" value="65">
+        <input type="hidden" name="PercentSalaryHike" value="12">
+        <input type="hidden" name="StockOptionLevel" value="0">
+        <input type="hidden" name="YearsWithCurrManager" value="2">
+        <input type="hidden" name="NumCompaniesWorked" value="1">
+        <input type="hidden" name="TrainingTimesLastYear" value="2">
+        <input type="hidden" name="RelationshipSatisfaction" value="3">
+        <input type="hidden" name="BusinessTravel" value="Travel_Rarely">
 
         <button type="submit" id="predictBtn" class="btn-predict">
             <i class="fas fa-brain"></i> JALANKAN ANALISIS PREDIKTIF
@@ -162,16 +198,29 @@
             
             <div class="progress-container">
                 <div class="progress-bar">
-                    <div class="progress-fill {{ result.confidence_class }}"></div>
+                    <div class="progress-fill {{ result.confidence_class|default('success') }}" style="width: {{ result.confidence|default(0) }}%;"></div>
                 </div>
                 <div class="progress-labels">
-                    <span>Rendah</span>
-                    <span>Tinggi</span>
+                    <span>Rendah (0-30%)</span>
+                    <span style="text-align: center; flex: 1;">Sedang (30-70%)</span>
+                    <span style="text-align: right;">Tinggi (70-100%)</span>
                 </div>
+            </div>
+
+            <div style="margin-top: 12px; text-align: center; padding: 12px; background: rgba(15,23,42,0.05); border-radius: 8px;">
+                <span style="font-size: 0.85rem; font-weight: 600; color: #334155;">
+                    {% if result.confidence < 30 %}
+                    📊 Risiko RENDAH - Karyawan kemungkinan BERTAHAN
+                    {% elif result.confidence < 70 %}
+                    ⚠️ Risiko SEDANG - Perlu monitoring
+                    {% else %}
+                    🚨 Risiko TINGGI - Perlu intervensi segera
+                    {% endif %}
+                </span>
             </div>
             
             <p class="result-description">
-                Berdasarkan analysis data yang diinput, sistem memprediksi karyawan akan 
+                Berdasarkan analisis data yang diinput, sistem memprediksi karyawan akan 
                 <strong>{{ result.status }}</strong> dengan tingkat kepercayaan 
                 <strong>{{ result.confidence }}%</strong>.
                 {% if result.status == 'Resign' %}
@@ -200,16 +249,25 @@
                     <div class="metric-bar">
                         <div class="metric-fill dynamic-fill" data-progress="{{ result.rule_risk }}"></div>
                     </div>
+                    <div style="font-size: 0.75rem; margin-top: 6px; color: #64748b; text-align: center;">
+                        {% if result.rule_risk < 30 %}
+                        ✅ Risiko Rendah
+                        {% elif result.rule_risk < 70 %}
+                        ⚠️ Risiko Sedang
+                        {% else %}
+                        ❌ Risiko Tinggi
+                        {% endif %}
+                    </div>
                 </div>
                 
                 <div class="risk-status">
                     <div class="status-item">
                         <span class="status-label">Model Status:</span>
-                        <span class="status-value {{ 'success' if result.model_status == 'Stay' else 'danger' }}">{{ result.model_status }}</span>
+                        <span class="status-value {{ 'success' if result.model_status == 'Bertahan' else 'danger' }}">{{ result.model_status }}</span>
                     </div>
                     <div class="status-item">
                         <span class="status-label">Rule Status:</span>
-                        <span class="status-value {{ 'success' if result.rule_status == 'Stay' else 'danger' }}">{{ result.rule_status }}</span>
+                        <span class="status-value {{ 'success' if result.rule_status == 'Bertahan' else 'danger' }}">{{ result.rule_status }}</span>
                     </div>
                 </div>
                 
@@ -250,6 +308,26 @@
                         <div class="metric-value">{{ result.performance.test.f1 }}%</div>
                     </div>
                 </div>
+
+                <div class="metric-item">
+                    <div class="metric-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-name">Precision</div>
+                        <div class="metric-value">{{ result.performance.test.precision }}%</div>
+                    </div>
+                </div>
+
+                <div class="metric-item">
+                    <div class="metric-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-name">Recall</div>
+                        <div class="metric-value">{{ result.performance.test.recall }}%</div>
+                    </div>
+                </div>
                 
                 <div class="metric-item">
                     <div class="metric-icon">
@@ -281,35 +359,16 @@
     {% endif %}
 </div>
 
-<style>
-@media (max-width: 768px) {
-    .card { padding: 30px 20px; }
-    .form-header { flex-direction: column; align-items: flex-start; margin-bottom: 25px; }
-    .form-grid { gap: 30px; }
-    .input-section { gap: 22px; }
-    .result-header { flex-direction: column; }
-    .metric-grid { grid-template-columns: 1fr 1fr; }
-    
-    .results-container { gap: 20px; }
-    .result-card { padding: 24px 20px; }
-    .card-header { gap: 16px; flex-direction: column; text-align: center; }
-    .card-icon { width: 50px; height: 50px; font-size: 1.2rem; }
-    .card-content h3 { font-size: 1.2rem; }
-    .confidence-badge { font-size: 1rem; padding: 10px 16px; }
-    .progress-container .progress-bar { height: 20px; }
-    .metrics-grid { grid-template-columns: 1fr; gap: 16px; }
-    .metric-item { padding: 16px; }
-    .metric-icon { width: 40px; height: 40px; font-size: 1rem; }
-    .risk-status { grid-template-columns: 1fr; }
-    .status-item { padding: 10px 12px; }
-}
-</style>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var form = document.querySelector('form[action="/predict"]');
         var button = document.getElementById('predictBtn');
         var overlay = document.getElementById('loadingOverlay');
+        var employeeIdField = document.getElementById('EmployeeId');
+
+        if (employeeIdField) {
+            employeeIdField.value = Math.floor(Math.random() * 900000) + 100000;
+        }
 
         if (form && button && overlay) {
             form.addEventListener('submit', function() {

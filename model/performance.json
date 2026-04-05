@@ -1,0 +1,1 @@
+{"test": {"accuracy": 83.96, "f1": 52.78, "precision": 52.78, "recall": 52.78}, "val": {"accuracy": 90.78}, "overfit_gap": 6.82, "cv_f1_mean": 51.4, "cv_f1_std": 0.8}

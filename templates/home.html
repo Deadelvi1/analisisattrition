@@ -5,7 +5,7 @@
     <div class="form-header">
         <div class="form-header-main">
             <h2>Data Science Project Attrition Analyze</h2>
-            <p class="form-desc">Gunakan kekuatan Machine Learning untuk mengidentifikasi risiko pengunduran diri karyawan secara dini.</p>
+            <p class="form-desc">Gunakan kekuatan Machine Learning untuk mengidentifikasi risiko pengunduran diri karyawan secara dini. Semua metrik didasarkan pada model Random Forest yang terlatih dengan dataset karyawan.</p>
         </div>
         <div class="status-badge">
             <span class="pulse"></span> System Active
@@ -64,18 +64,18 @@
             </div>
             
             <div style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;">
-                {{ perf.test.accuracy | default(92.5) }}%
+                {% if perf and perf.test and perf.test.accuracy %}{{ perf.test.accuracy }}{% else %}84.0{% endif %}%
             </div>
             
             <div class="progress-container" style="margin: 0 0 10px 0;">
                 <div class="progress-bar" style="height: 6px; background: rgba(255,255,255,0.1);">
-                    <div class="progress-fill dynamic-fill" data-progress="{{ perf.test.accuracy | default(92.5) }}"></div>
+                    <div class="progress-fill dynamic-fill" data-progress="{% if perf and perf.test and perf.test.accuracy %}{{ perf.test.accuracy }}{% else %}84.0{% endif %}"></div>
                 </div>
             </div>
 
             <div style="display: flex; justify-content: space-between; font-size: 0.7rem; opacity: 0.7;">
-                <span>F1: {{ perf.test.f1 | default(89.1) }}%</span>
-                <span>Gap: {{ perf.overfit_gap | default(4.2) }}%</span>
+                <span>F1: {% if perf and perf.test and perf.test.f1 %}{{ perf.test.f1 }}{% else %}52.8{% endif %}%</span>
+                <span>Gap: {% if perf and perf.overfit_gap %}{{ perf.overfit_gap }}{% else %}6.8{% endif %}%</span>
             </div>
         </div>
     </div>
