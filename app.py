@@ -3,6 +3,7 @@ import pandas as pd
 import joblib
 import os
 import json
+import mlflow
 from pathlib import Path
 
 app = Flask(__name__)
@@ -11,6 +12,8 @@ ROOT_DIR = Path(__file__).resolve().parent
 MODEL_PATH = ROOT_DIR / "model" / "rf_model_tuning_latest.pkl"
 MODEL_ALT_PATH = ROOT_DIR / "model" / "rf_model_latest.pkl"
 PERF_PATH = ROOT_DIR / "model" / "performance.json"
+MLFLOW_TRACKING_URI = "https://dagshub.com/deadelvina9/attrition-mlops.mlflow"
+MODEL_REGISTRY_URI = "models:/rf_model_tuning/2"
 model = None
 MODEL_READY = False
 
@@ -23,6 +26,23 @@ performance = {
 }
 
 
+def load_remote_model():
+    global model, MODEL_READY
+    try:
+        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+        remote_model = mlflow.sklearn.load_model(MODEL_REGISTRY_URI)
+        if remote_model is not None:
+            model = remote_model
+            MODEL_READY = True
+            os.makedirs(ROOT_DIR / "model", exist_ok=True)
+            joblib.dump(model, MODEL_ALT_PATH)
+            print(f"Loaded remote model and saved local copy to {MODEL_ALT_PATH}")
+            return True
+    except Exception as e:
+        print(f"Remote model load failed: {e}")
+    return False
+
+
 def load_model():
     global model, MODEL_READY
     for candidate in [MODEL_PATH, MODEL_ALT_PATH]:
@@ -30,9 +50,13 @@ def load_model():
             try:
                 model = joblib.load(candidate)
                 MODEL_READY = True
+                print(f"Loaded local model from {candidate}")
                 return
-            except Exception:
-                continue
+            except Exception as e:
+                print(f"Local model load failed for {candidate}: {e}")
+    print("Attempting remote model load from Dagshub...")
+    if load_remote_model():
+        return
     MODEL_READY = False
 
 
@@ -175,7 +199,7 @@ def predict():
         except Exception as e:
             note = f"Error: {str(e)}"
 
-    return render_template("form_prediction.html", result=result, note=note)
+    return render_template("form_prediction.html", result=result, note=note, model_ready=MODEL_READY)
 
 
 @app.route('/api/predict', methods=['POST'])

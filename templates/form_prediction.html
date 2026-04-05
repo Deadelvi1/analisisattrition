@@ -6,13 +6,8 @@
             <h2>Form Analisis Prediktif Karyawan</h2>
             <p class="form-desc">Masukkan data karyawan untuk memprediksi risiko pengunduran diri dengan akurasi tinggi</p>
         </div>
-        <div class="status-badge">
-            <span class="pulse"></span> Model Siap
-        </div>
-    </div>
-
-    <form method="POST" action="/predict">
-        <input type="hidden" name="EmployeeId" id="EmployeeId" value="">
+            <div class="status-badge {{ 'ready' if model_ready else 'not-ready' }}">
+                <span class="pulse"></span> {{ 'Model Siap' if model_ready else 'Model Tidak Siap' }}
 
         <div class="form-grid">
             <div class="input-section">
