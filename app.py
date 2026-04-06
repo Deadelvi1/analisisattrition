@@ -9,9 +9,11 @@ from pathlib import Path
 app = Flask(__name__)
 
 ROOT_DIR = Path(__file__).resolve().parent
-MODEL_PATH = ROOT_DIR / "model" / "rf_model_tuning_latest.pkl"
-MODEL_ALT_PATH = ROOT_DIR / "model" / "rf_model_latest.pkl"
-PERF_PATH = ROOT_DIR / "model" / "performance.json"
+MODEL_DIR = ROOT_DIR / "model"
+MODEL_PATH = MODEL_DIR / "rf_model_tuning_latest.pkl"
+MODEL_ALT_PATH = MODEL_DIR / "rf_model_latest.pkl"
+MODEL_FALLBACK_PATH = MODEL_DIR / "rf_model.pkl"
+PERF_PATH = MODEL_DIR / "performance.json"
 MLFLOW_TRACKING_URI = "https://dagshub.com/deadelvina9/attrition-mlops.mlflow"
 MODEL_REGISTRY_URI = "models:/rf_model_tuning/2"
 model = None
@@ -44,19 +46,35 @@ def load_remote_model():
 
 
 def load_model():
-    global model, MODEL_READY
-    for candidate in [MODEL_PATH, MODEL_ALT_PATH]:
+    global model, MODEL_READY, MODEL_PATH
+
+    candidate_paths = [MODEL_PATH, MODEL_ALT_PATH, MODEL_FALLBACK_PATH]
+    resolved_candidates = []
+
+    for candidate in candidate_paths:
         if candidate.exists():
-            try:
-                model = joblib.load(candidate)
-                MODEL_READY = True
-                print(f"Loaded local model from {candidate}")
-                return
-            except Exception as e:
-                print(f"Local model load failed for {candidate}: {e}")
-    print("Attempting remote model load from Dagshub...")
+            resolved_candidates.append(candidate)
+
+    if not resolved_candidates and MODEL_DIR.exists():
+        resolved_candidates = sorted(MODEL_DIR.glob("*.pkl"))
+
+    print(f"Model directory: {MODEL_DIR}")
+    print(f"Resolved model candidates: {resolved_candidates}")
+
+    for candidate in resolved_candidates:
+        try:
+            model = joblib.load(candidate)
+            MODEL_READY = True
+            MODEL_PATH = candidate
+            print(f"Loaded local model from {candidate}")
+            return
+        except Exception as e:
+            print(f"Local model load failed for {candidate}: {e}")
+
+    print("No valid local model found. Attempting remote model load from Dagshub...")
     if load_remote_model():
         return
+
     MODEL_READY = False
 
 
