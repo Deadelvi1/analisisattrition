@@ -126,17 +126,17 @@ def predict():
 
     if request.method == 'GET' and not MODEL_READY:
         note = (
-            "Model belum siap. Pastikan file model sudah ada di folder `model/` "
-            "dan Railway menggunakan kode yang sama dari repository."
+            "Model belum siap. Pastikan file `model/rf_model_tuning_latest.pkl` dan `model/performance.json` "
+            "tersedia di repository, lalu push ulang ke Railway."
         )
 
     if request.method == 'POST':
         if not MODEL_READY:
             note = (
-                "Model belum siap. Pastikan file model sudah ada di folder `model/` "
-                "dan Railway menggunakan kode yang sama dari repository."
+                "Model belum siap. Pastikan file `model/rf_model_tuning_latest.pkl` dan `model/performance.json` "
+                "tersedia di repository, lalu push ulang ke Railway."
             )
-            return render_template("form_prediction.html", result=None, note=note)
+            return render_template("form_prediction.html", result=None, note=note, model_ready=MODEL_READY)
 
         try:
             try:

@@ -8,7 +8,10 @@
         </div>
             <div class="status-badge {{ 'ready' if model_ready else 'not-ready' }}">
                 <span class="pulse"></span> {{ 'Model Siap' if model_ready else 'Model Tidak Siap' }}
+            </div>
+        </div>
 
+        <form method="POST" action="/predict">
         <div class="form-grid">
             <div class="input-section">
                 <h4>📌 Profil Karyawan</h4>
@@ -148,6 +151,7 @@
         <input type="hidden" name="TrainingTimesLastYear" value="2">
         <input type="hidden" name="RelationshipSatisfaction" value="3">
         <input type="hidden" name="BusinessTravel" value="Travel_Rarely">
+        <input type="hidden" name="EmployeeId" id="EmployeeId" value="1">
 
         <button type="submit" id="predictBtn" class="btn-predict">
             <i class="fas fa-brain"></i> JALANKAN ANALISIS PREDIKTIF
