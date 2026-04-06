@@ -3,7 +3,6 @@ import pandas as pd
 import joblib
 import os
 import json
-import mlflow
 from pathlib import Path
 
 app = Flask(__name__)
@@ -18,6 +17,7 @@ MLFLOW_TRACKING_URI = "https://dagshub.com/deadelvina9/attrition-mlops.mlflow"
 MODEL_REGISTRY_URI = "models:/rf_model_tuning/2"
 model = None
 MODEL_READY = False
+mlflow = None
 
 performance = {
     "test": {"accuracy": 83.96, "f1": 52.78, "precision": 52.78, "recall": 52.78},
@@ -29,7 +29,15 @@ performance = {
 
 
 def load_remote_model():
-    global model, MODEL_READY
+    global model, MODEL_READY, mlflow
+    if mlflow is None:
+        try:
+            import mlflow
+            mlflow = mlflow
+        except ImportError:
+            print("Remote model load skipped because mlflow is not installed")
+            return False
+
     try:
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
         remote_model = mlflow.sklearn.load_model(MODEL_REGISTRY_URI)
