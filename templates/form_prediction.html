@@ -41,22 +41,6 @@
                     </select>
                     <small>Unit kerja karyawan</small>
                 </div>
-
-                <div class="input-group">
-                    <label><i class="fas fa-user-tie" style="margin-right: 8px; color: var(--accent);"></i> Job Role</label>
-                    <select name="JobRole" required>
-                        <option value="Research Scientist">Research Scientist</option>
-                        <option value="Laboratory Technician">Laboratory Technician</option>
-                        <option value="Manufacturing Director">Manufacturing Director</option>
-                        <option value="Research Director">Research Director</option>
-                        <option value="Healthcare Representative">Healthcare Representative</option>
-                        <option value="Sales Representative">Sales Representative</option>
-                        <option value="Sales Executive">Sales Executive</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Human Resources">Human Resources</option>
-                    </select>
-                    <small>Peran pekerjaan karyawan</small>
-                </div>
             </div>
 
             <div class="input-section">
@@ -151,6 +135,7 @@
         <input type="hidden" name="TrainingTimesLastYear" value="2">
         <input type="hidden" name="RelationshipSatisfaction" value="3">
         <input type="hidden" name="BusinessTravel" value="Travel_Rarely">
+        <input type="hidden" name="JobRole" value="Sales Executive">
         <input type="hidden" name="EmployeeId" id="EmployeeId" value="1">
 
         <button type="submit" id="predictBtn" class="btn-predict">
@@ -204,16 +189,33 @@
                     <span style="text-align: center; flex: 1;">Sedang (30-70%)</span>
                     <span style="text-align: right;">Tinggi (70-100%)</span>
                 </div>
+                <div style="font-size: 0.75rem; margin-top: 4px; color: #64748b; text-align: center;">
+                    {% if result.status == 'Bertahan' %}
+                    Confidence pada prediksi BERTAHAN
+                    {% else %}
+                    Confidence pada prediksi RESIGN
+                    {% endif %}
+                </div>
             </div>
 
             <div style="margin-top: 12px; text-align: center; padding: 12px; background: rgba(15,23,42,0.05); border-radius: 8px;">
                 <span style="font-size: 0.85rem; font-weight: 600; color: #334155;">
-                    {% if result.confidence < 30 %}
-                    📊 Risiko RENDAH - Karyawan kemungkinan BERTAHAN
-                    {% elif result.confidence < 70 %}
-                    ⚠️ Risiko SEDANG - Perlu monitoring
+                    {% if result.status == 'Bertahan' %}
+                        {% if result.confidence >= 70 %}
+                        ✅ SANGAT YAKIN - Karyawan akan BERTAHAN
+                        {% elif result.confidence >= 40 %}
+                        ℹ️ CUKUP YAKIN - Kemungkinan Bertahan dengan peluang resign moderate
+                        {% else %}
+                        ⚠️ KURANG YAKIN - Prediksi Bertahan tapi dengan confidence rendah
+                        {% endif %}
                     {% else %}
-                    🚨 Risiko TINGGI - Perlu intervensi segera
+                        {% if result.confidence >= 70 %}
+                        🚨 SANGAT BERISIKO - Karyawan AKAN RESIGN
+                        {% elif result.confidence >= 40 %}
+                        ⚠️ CUKUP BERISIKO - Perlu monitoring dan intervensi
+                        {% else %}
+                        ℹ️ RENDAH BERISIKO - Prediksi Resign tapi dengan confidence rendah
+                        {% endif %}
                     {% endif %}
                 </span>
             </div>
@@ -228,52 +230,6 @@
                 Karyawan ini memiliki engagement tinggi dan kemungkinan akan bertahan.
                 {% endif %}
             </p>
-        </div>
-
-        <div class="result-card risk-analysis">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="card-content">
-                    <h3>Analisis Risiko Detail</h3>
-                    <p class="card-subtitle">Breakdown skor risiko dan faktor penentu</p>
-                </div>
-            </div>
-            
-            <div class="risk-details">
-                <div class="risk-metric">
-                    <div class="metric-label">Rule-based Risk Score</div>
-                    <div class="metric-value">{{ result.rule_risk }}%</div>
-                    <div class="metric-bar">
-                        <div class="metric-fill dynamic-fill" data-progress="{{ result.rule_risk }}"></div>
-                    </div>
-                    <div style="font-size: 0.75rem; margin-top: 6px; color: #64748b; text-align: center;">
-                        {% if result.rule_risk < 30 %}
-                        ✅ Risiko Rendah
-                        {% elif result.rule_risk < 70 %}
-                        ⚠️ Risiko Sedang
-                        {% else %}
-                        ❌ Risiko Tinggi
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="risk-status">
-                    <div class="status-item">
-                        <span class="status-label">Model Status:</span>
-                        <span class="status-value {{ 'success' if result.model_status == 'Bertahan' else 'danger' }}">{{ result.model_status }}</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Rule Status:</span>
-                        <span class="status-value {{ 'success' if result.rule_status == 'Bertahan' else 'danger' }}">{{ result.rule_status }}</span>
-                    </div>
-                </div>
-                
-                <div class="explanation-box">
-                    <strong>Penjelasan:</strong> {{ result.explanation }}
-                </div>
-            </div>
         </div>
 
         <div class="result-card performance-metrics">

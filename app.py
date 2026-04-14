@@ -96,37 +96,6 @@ except Exception:
     pass
 
 
-def compute_rule_risk(raw):
-    def num(key, default=0):
-        try:
-            return float(raw.get(key, default))
-        except:
-            return default
-
-    score = 0
-
-    if num('EnvironmentSatisfaction', 4) <= 2:
-        score += 2
-    if num('JobSatisfaction', 4) <= 2:
-        score += 2
-    if raw.get('OverTime', '').lower() in ['yes', 'y', 'true', '1']:
-        score += 2
-    if num('WorkLifeBalance', 4) <= 2:
-        score += 1
-    if num('YearsSinceLastPromotion', 0) >= 3:
-        score += 1
-    if num('YearsAtCompany', 0) <= 1:
-        score += 1
-    if num('DistanceFromHome', 0) > 20:
-        score += 1
-    if num('NumCompaniesWorked', 0) >= 5:
-        score += 1
-    if num('MonthlyIncome', 0) < 4500:
-        score += 1
-
-    return min(1.0, score / 12) * 100
-
-
 @app.route('/')
 def home():
     global performance
@@ -173,6 +142,27 @@ def predict():
             
             raw_data = request.form.to_dict()
             df = pd.DataFrame([raw_data])
+            
+            required_features = list(model.feature_names_in_)
+            
+            for col in required_features:
+                if col not in df.columns:
+                    df[col] = '0'
+             
+            df = df[required_features]
+            
+            numeric_cols = ['Age', 'DailyRate', 'DistanceFromHome', 'Education', 
+                           'EnvironmentSatisfaction', 'HourlyRate', 'JobInvolvement',
+                           'JobLevel', 'JobSatisfaction', 'MonthlyIncome', 'MonthlyRate',
+                           'NumCompaniesWorked', 'PercentSalaryHike', 'PerformanceRating',
+                           'RelationshipSatisfaction', 'StockOptionLevel', 'TotalWorkingYears',
+                           'TrainingTimesLastYear', 'WorkLifeBalance', 'YearsAtCompany',
+                           'YearsInCurrentRole', 'YearsSinceLastPromotion', 'YearsWithCurrManager',
+                           'EmployeeId']
+            
+            for col in numeric_cols:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
 
             pred = model.predict(df)[0]
 
@@ -181,28 +171,23 @@ def predict():
             else:
                 prob = 0.0
 
-            risk_score = compute_rule_risk(raw_data)
-
             status_model = "Resign" if pred == 1 else "Bertahan"
-            status_rule = "Resign" if risk_score >= 55 else "Bertahan"
 
-            final_status = status_model
+            # Adjust confidence to show certainty of the predicted class
+            # If Bertahan (pred=0), show confidence of NOT resigning: (1-prob)*100
+            # If Resign (pred=1), show confidence of resigning: prob*100
+            if pred == 0:
+                confidence_pct = round((1 - prob) * 100, 2)
+            else:
+                confidence_pct = round(prob * 100, 2)
 
             explanation = []
-
-            if status_model != status_rule:
-                explanation.append(f"Model: {status_model}, Rule: {status_rule}")
-
-            if risk_score >= 70 and status_model == "Bertahan":
-                explanation.append("Risiko tinggi")
 
             if pred == 1 and prob < 0.4:
                 explanation.append("Confidence rendah")
 
             if not explanation:
                 explanation.append("Konsisten")
-
-            confidence_pct = round(prob * 100, 2)
 
             if confidence_pct >= 70:
                 confidence_class = "success"
@@ -212,12 +197,9 @@ def predict():
                 confidence_class = "danger"
 
             result = {
-                "status": final_status,
+                "status": status_model,
                 "confidence": confidence_pct,
                 "confidence_class": confidence_class,
-                "rule_risk": round(risk_score, 2),
-                "model_status": status_model,
-                "rule_status": status_rule,
                 "explanation": " | ".join(explanation),
                 "performance": performance
             }
@@ -236,6 +218,18 @@ def api_predict():
     try:
         data = request.json
         df = pd.DataFrame([data])
+        
+        # Get required features from model
+        required_features = list(model.feature_names_in_)
+        
+        # Add missing columns with 0
+        for col in required_features:
+            if col not in df.columns:
+                df[col] = 0
+        
+        # Select only required columns in correct order
+        df = df[required_features]
+        
         pred = model.predict(df)[0]
 
         if hasattr(model, "predict_proba"):
