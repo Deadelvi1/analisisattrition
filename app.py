@@ -173,9 +173,6 @@ def predict():
 
             status_model = "Resign" if pred == 1 else "Bertahan"
 
-            # Adjust confidence to show certainty of the predicted class
-            # If Bertahan (pred=0), show confidence of NOT resigning: (1-prob)*100
-            # If Resign (pred=1), show confidence of resigning: prob*100
             if pred == 0:
                 confidence_pct = round((1 - prob) * 100, 2)
             else:
@@ -208,43 +205,6 @@ def predict():
             note = f"Error: {str(e)}"
 
     return render_template("form_prediction.html", result=result, note=note, model_ready=MODEL_READY)
-
-
-@app.route('/api/predict', methods=['POST'])
-def api_predict():
-    if not MODEL_READY:
-        return jsonify({"error": "Model belum siap"})
-
-    try:
-        data = request.json
-        df = pd.DataFrame([data])
-        
-        # Get required features from model
-        required_features = list(model.feature_names_in_)
-        
-        # Add missing columns with 0
-        for col in required_features:
-            if col not in df.columns:
-                df[col] = 0
-        
-        # Select only required columns in correct order
-        df = df[required_features]
-        
-        pred = model.predict(df)[0]
-
-        if hasattr(model, "predict_proba"):
-            prob = model.predict_proba(df)[0][1]
-        else:
-            prob = 0.0
-
-        return jsonify({
-            "prediction": int(pred),
-            "confidence": round(prob * 100, 2)
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)})
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8000))
